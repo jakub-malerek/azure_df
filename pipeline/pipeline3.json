@@ -1,0 +1,189 @@
+{
+	"name": "pipeline3",
+	"properties": {
+		"activities": [
+			{
+				"name": "json_to_dwh",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Data flow1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['Correlation_id']"
+								},
+								"sink": {
+									"name": "Correlation_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Operation_name']"
+								},
+								"sink": {
+									"name": "Operation_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Status']"
+								},
+								"sink": {
+									"name": "Status",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Event_category']"
+								},
+								"sink": {
+									"name": "Event_category",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Level']"
+								},
+								"sink": {
+									"name": "Level",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Time']"
+								},
+								"sink": {
+									"name": "Time",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Subscription']"
+								},
+								"sink": {
+									"name": "Subscription",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Event_initiated_by']"
+								},
+								"sink": {
+									"name": "Eventinitiated_by",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Resource_type']"
+								},
+								"sink": {
+									"name": "Resource_type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Resource_group']"
+								},
+								"sink": {
+									"name": "Resource_group",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Resource']"
+								},
+								"sink": {
+									"name": "Resource",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "log_json",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "table_logdata_parquet",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflow4",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-02-21T14:07:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

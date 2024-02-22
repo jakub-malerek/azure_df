@@ -1,0 +1,17 @@
+{
+	"name": "AzureSynapseAnalyticsTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Synapse_DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "",
+			"table": "SalesTarget"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

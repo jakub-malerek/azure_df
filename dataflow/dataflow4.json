@@ -1,0 +1,55 @@
+{
+	"name": "dataflow4",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "log_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "LogParquetSource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "log_json_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "jsonOutput"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          Correlation_id as string,",
+				"          Operation_name as string,",
+				"          Status as string,",
+				"          Event_category as string,",
+				"          Level as string,",
+				"          Time as timestamp,",
+				"          Subscription as string,",
+				"          Event_initiated_by as string,",
+				"          Resource_type as string,",
+				"          Resource_group as string,",
+				"          Resource as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> LogParquetSource",
+				"LogParquetSource sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['log.json'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> jsonOutput"
+			]
+		}
+	}
+}

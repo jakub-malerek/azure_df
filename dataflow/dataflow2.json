@@ -1,0 +1,228 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "product_csv",
+						"type": "DatasetReference"
+					},
+					"name": "productcsv"
+				},
+				{
+					"dataset": {
+						"referenceName": "product_category_csv",
+						"type": "DatasetReference"
+					},
+					"name": "productcategorycsv"
+				},
+				{
+					"dataset": {
+						"referenceName": "product_model_csv",
+						"type": "DatasetReference"
+					},
+					"name": "productmodelcsv"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSynapseAnalyticsTable2",
+						"type": "DatasetReference"
+					},
+					"name": "previousresultset"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSynapseAnalyticsTable2",
+						"type": "DatasetReference"
+					},
+					"name": "TargetCheck"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ProductResultCSVTable",
+						"type": "DatasetReference"
+					},
+					"name": "LoadtoDWH"
+				},
+				{
+					"name": "MaxProductSK"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "SELECT"
+				},
+				{
+					"name": "Result"
+				},
+				{
+					"name": "ProductSKSurrogateKeyAdd"
+				},
+				{
+					"name": "SurrogateKeyUpdate"
+				},
+				{
+					"name": "CheckDuplites"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ProductID as string,",
+				"          Name as string,",
+				"          ProductNumber as string,",
+				"          Color as string,",
+				"          StandardCost as decimal(10,0),",
+				"          ListPrice as decimal(10,0),",
+				"          Size as string,",
+				"          Weight as string,",
+				"          ProductCategoryID as string,",
+				"          ProductModelID as string,",
+				"          SellStartDate as string,",
+				"          SellEndDate as string,",
+				"          DiscontinuedDate as string,",
+				"          ThumbNailPhoto as string,",
+				"          ThumbnailPhotoFileName as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> productcsv",
+				"source(output(",
+				"          ProductCategoryID as string,",
+				"          ParentProductCategoryID as string,",
+				"          Name as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> productcategorycsv",
+				"source(output(",
+				"          ProductModelID as string,",
+				"          Name as string,",
+				"          CatalogDescription as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> productmodelcsv",
+				"source(output(",
+				"          maxSK as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT MAX(ProductSK) AS maxSK FROM csvresult',",
+				"     format: 'query',",
+				"     staged: true) ~> previousresultset",
+				"source(output(",
+				"          ProductSK as integer,",
+				"          ProductID as string,",
+				"          Name as string,",
+				"          Color as string,",
+				"          StandardCost as decimal(10,0),",
+				"          ListPrice as decimal(10,0),",
+				"          Size as string,",
+				"          Weight as string,",
+				"          CatalogDescription as string,",
+				"          calculation as decimal(21,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table',",
+				"     staged: true) ~> TargetCheck",
+				"CheckDuplites, productcategorycsv join(productcsv@ProductCategoryID == productcategorycsv@ProductCategoryID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, productmodelcsv join(productcsv@ProductModelID == productmodelcsv@ProductModelID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          ProductID,",
+				"          Name = productcsv@Name,",
+				"          Color,",
+				"          StandardCost,",
+				"          ListPrice,",
+				"          Size,",
+				"          Weight,",
+				"          Name = productcategorycsv@Name,",
+				"          Name = productmodelcsv@Name,",
+				"          CatalogDescription",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SELECT",
+				"SELECT derive(calculation = StandardCost*ListPrice) ~> Result",
+				"Result keyGenerate(output(ProductSK as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> ProductSKSurrogateKeyAdd",
+				"ProductSKSurrogateKeyAdd derive(ProductSK = ProductSK+MaxProductSK#outputs()[1].maxSK) ~> SurrogateKeyUpdate",
+				"productcsv, TargetCheck exists(productcsv@ProductID == TargetCheck@ProductID,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> CheckDuplites",
+				"SurrogateKeyUpdate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ProductSK as integer,",
+				"          ProductID as string,",
+				"          Name as string,",
+				"          Color as string,",
+				"          StandardCost as decimal(10,0),",
+				"          ListPrice as decimal(10,0),",
+				"          Size as string,",
+				"          Weight as string,",
+				"          CatalogDescription as string,",
+				"          calculation as decimal(21,0)",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ProductSK,",
+				"          ProductID,",
+				"          Name,",
+				"          Color,",
+				"          StandardCost,",
+				"          ListPrice,",
+				"          Size,",
+				"          Weight,",
+				"          CatalogDescription,",
+				"          calculation",
+				"     )) ~> LoadtoDWH",
+				"previousresultset sink(validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     store: 'cache',",
+				"     format: 'inline',",
+				"     output: false,",
+				"     saveOrder: 1,",
+				"     mapColumn(",
+				"          maxSK",
+				"     )) ~> MaxProductSK"
+			]
+		}
+	}
+}

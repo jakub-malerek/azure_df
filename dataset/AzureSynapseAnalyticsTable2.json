@@ -1,0 +1,65 @@
+{
+	"name": "AzureSynapseAnalyticsTable2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Synapse_DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "ProductSK",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProductID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Color",
+				"type": "nvarchar"
+			},
+			{
+				"name": "StandardCost",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 0
+			},
+			{
+				"name": "ListPrice",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 0
+			},
+			{
+				"name": "Size",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Weight",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CatalogDescription",
+				"type": "nvarchar"
+			},
+			{
+				"name": "calculation",
+				"type": "decimal",
+				"precision": 21,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "",
+			"table": "csvresult"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

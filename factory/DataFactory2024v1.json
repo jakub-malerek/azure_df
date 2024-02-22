@@ -1,0 +1,9 @@
+{
+	"name": "DataFactory2024v1",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "e88b7f6d-3a07-4935-a24a-ee37801c4121",
+		"tenantId": "347d1e8c-56e4-4755-a0c5-987bf716fe0d"
+	}
+}

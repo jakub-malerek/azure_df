@@ -1,0 +1,62 @@
+{
+	"name": "AzureSqlTable3",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SalesDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Correlation_id",
+				"type": "varchar"
+			},
+			{
+				"name": "Operation_name",
+				"type": "varchar"
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			},
+			{
+				"name": "Event_category",
+				"type": "varchar"
+			},
+			{
+				"name": "Level",
+				"type": "varchar"
+			},
+			{
+				"name": "Time",
+				"type": "varchar"
+			},
+			{
+				"name": "Subscription",
+				"type": "varchar"
+			},
+			{
+				"name": "Event_initiated_by",
+				"type": "varchar"
+			},
+			{
+				"name": "Resource_type",
+				"type": "varchar"
+			},
+			{
+				"name": "Resource_group",
+				"type": "varchar"
+			},
+			{
+				"name": "Resource",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "log"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

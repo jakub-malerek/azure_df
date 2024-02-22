@@ -1,0 +1,19 @@
+{
+	"name": "jsontest",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "data_lake_service",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "datalake"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

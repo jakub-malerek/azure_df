@@ -1,0 +1,76 @@
+{
+	"name": "dataflow3",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "log_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "log_parquet_table",
+						"type": "DatasetReference"
+					},
+					"name": "ParquetBasedTable"
+				}
+			],
+			"transformations": [
+				{
+					"name": "nullFilter"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Correlation_id as string,",
+				"          Operation_name as string,",
+				"          Status as string,",
+				"          Event_category as string,",
+				"          Level as string,",
+				"          Time as timestamp,",
+				"          Subscription as string,",
+				"          Event_initiated_by as string,",
+				"          Resource_type as string,",
+				"          Resource_group as string,",
+				"          Resource as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source1",
+				"source1 filter(!isNull(Event_initiated_by)) ~> nullFilter",
+				"nullFilter sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Correlation_id as string,",
+				"          Operation_name as string,",
+				"          Status as string,",
+				"          Event_category as string,",
+				"          Level as string,",
+				"          Time as timestamp,",
+				"          Subscription as string,",
+				"          Eventinitiated_by as string,",
+				"          Resource_type as string,",
+				"          Resource_group as string,",
+				"          Resource as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> ParquetBasedTable"
+			]
+		}
+	}
+}

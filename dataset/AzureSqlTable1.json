@@ -1,0 +1,43 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SalesDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "customerid",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "customername",
+				"type": "varchar"
+			},
+			{
+				"name": "registered",
+				"type": "bit"
+			},
+			{
+				"name": "course",
+				"type": "varchar"
+			},
+			{
+				"name": "mobile",
+				"type": "varchar"
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "customer"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
